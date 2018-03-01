@@ -71,11 +71,11 @@ namespace CoiniumServ.Algorithms.Implementations
                 int algoDigit = (x & 1) != 0 ? input[b] & 0xf : input[b] >> 4;
                 if (algoDigit >= 10)
                 {
-                    output = output + 'A' + (algoDigit - 10);
+                    output = output + (char)('A' + (algoDigit - 10));
                 }
                 else
                 {
-                    output = output + algoDigit;
+                    output = output + (char)algoDigit;
                 }
 
             }
