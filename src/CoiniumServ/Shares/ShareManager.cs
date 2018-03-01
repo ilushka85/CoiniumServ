@@ -97,6 +97,7 @@ namespace CoiniumServ.Shares
 
             // create the share
             var share = new Share(miner, id, job, extraNonce2, nTimeString, nonceString);
+            _logger.Debug("Share submitted at {0:0.00} : " + share.IsValid);
 
             if (share.IsValid)
                 HandleValidShare(share);
@@ -115,7 +116,7 @@ namespace CoiniumServ.Shares
 
         private void HandleValidShare(IShare share)
         {
-            var miner = (IStratumMiner) share.Miner;
+            var miner = (IStratumMiner)share.Miner;
             miner.ValidShareCount++;
 
             _storageLayer.AddShare(share); // commit the share.
@@ -124,7 +125,7 @@ namespace CoiniumServ.Shares
             // check if share is a block candidate
             if (!share.IsBlockCandidate)
                 return;
-            
+
             // submit block candidate to daemon.
             var accepted = SubmitBlock(share);
 
@@ -146,7 +147,7 @@ namespace CoiniumServ.Shares
             switch (share.Error)
             {
                 case ShareError.DuplicateShare:
-                    exception = new DuplicateShareError(share.Nonce);                    
+                    exception = new DuplicateShareError(share.Nonce);
                     break;
                 case ShareError.IncorrectExtraNonce2Size:
                     exception = new OtherError("Incorrect extranonce2 size");
@@ -176,14 +177,41 @@ namespace CoiniumServ.Shares
         private bool SubmitBlock(IShare share)
         {
             // TODO: we should try different submission techniques and probably more then once: https://github.com/ahmedbodi/stratum-mining/blob/master/lib/bitcoin_rpc.py#L65-123
+            int attempts = 0;
+            bool rValue = false;
+            while (attempts < 5)
+            {
+                attempts++;
+                try
+                {
+                    if (_poolConfig.Coin.Options.SubmitBlockSupported) // see if submitblock() is available.
+                    {
+                        _logger.Debug("We are submitting via SubmitBlock;  [{0:l}] ", share.BlockHash.ToHexString());
 
+                        _daemonClient.SubmitBlock(share.BlockHex.ToHexString()); // submit the block.
+                    }
+                    else
+                    {
+                        _logger.Debug("We are submitting via GetBlockTemplate;  [{0:l}] ", share.BlockHash.ToHexString());
+                        _daemonClient.GetBlockTemplate(share.BlockHex.ToHexString()); // use getblocktemplate() if submitblock() is not supported.
+                    }
+                    rValue = true;
+                }
+                catch (RpcException e)
+                {
+                    // unlike BlockProcessor's detailed exception handling and decision making based on the error,
+                    // here in share-manager we only one-shot submissions. If we get an error, basically we just don't care about the rest
+                    // and flag the submission as failed.
+                    _logger.Debug("We thought a block was found but it was rejected by the coin daemon; [{0:l}] - reason; {1:l}", share.BlockHash.ToHexString(), e.Message);
+                    continue;
+                }
+            }
+            if(rValue==false)
+            {
+                return rValue;
+            }
             try
             {
-                if (_poolConfig.Coin.Options.SubmitBlockSupported) // see if submitblock() is available.
-                    _daemonClient.SubmitBlock(share.BlockHex.ToHexString()); // submit the block.
-                else
-                    _daemonClient.GetBlockTemplate(share.BlockHex.ToHexString()); // use getblocktemplate() if submitblock() is not supported.
-
                 var block = _daemonClient.GetBlock(share.BlockHash.ToHexString()); // query the block.
 
                 if (block == null) // make sure the block exists
@@ -234,39 +262,40 @@ namespace CoiniumServ.Shares
                 // unlike BlockProcessor's detailed exception handling and decision making based on the error,
                 // here in share-manager we only one-shot submissions. If we get an error, basically we just don't care about the rest
                 // and flag the submission as failed.
-                _logger.Debug("We thought a block was found but it was rejected by the coin daemon; [{0:l}] - reason; {1:l}", share.BlockHash.ToHexString(), e.Message);
+                _logger.Debug("We thought a block was found but while loading it back it was not found or had an error; [{0:l}] - reason; {1:l}", share.BlockHash.ToHexString(), e.Message);
                 return false;
             }
         }
+    }
 
-        private void OnBlockFound(EventArgs e)
+    private void OnBlockFound(EventArgs e)
+    {
+        var handler = BlockFound;
+
+        if (handler != null)
+            handler(this, e);
+    }
+
+    private void OnShareSubmitted(EventArgs e)
+    {
+        var handler = ShareSubmitted;
+
+        if (handler != null)
+            handler(this, e);
+    }
+
+    private void FindPoolAccount()
+    {
+        try
         {
-            var handler = BlockFound;
-
-            if (handler != null)
-                handler(this, e);
+            _poolAccount = !_poolConfig.Coin.Options.UseDefaultAccount // if UseDefaultAccount is not set
+                ? _daemonClient.GetAccount(_poolConfig.Wallet.Adress) // find the account of the our pool address.
+                : ""; // use the default account.
         }
-
-        private void OnShareSubmitted(EventArgs e)
+        catch (RpcException e)
         {
-            var handler = ShareSubmitted;
-
-            if (handler != null)
-                handler(this, e);
-        }
-
-        private void FindPoolAccount()
-        {
-            try
-            {
-                _poolAccount = !_poolConfig.Coin.Options.UseDefaultAccount // if UseDefaultAccount is not set
-                    ? _daemonClient.GetAccount(_poolConfig.Wallet.Adress) // find the account of the our pool address.
-                    : ""; // use the default account.
-            }
-            catch (RpcException e)
-            {
-                _logger.Error("Error getting account for pool central wallet address: {0:l} - {1:l}", _poolConfig.Wallet.Adress, e.Message);
-            }
+            _logger.Error("Error getting account for pool central wallet address: {0:l} - {1:l}", _poolConfig.Wallet.Adress, e.Message);
         }
     }
+}
 }
