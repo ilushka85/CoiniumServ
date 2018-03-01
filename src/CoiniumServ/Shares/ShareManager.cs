@@ -95,18 +95,28 @@ namespace CoiniumServ.Shares
             var id = Convert.ToUInt64(jobId, 16);
             var job = _jobTracker.Get(id);
 
+
             // create the share
-            var share = new Share(miner, id, job, extraNonce2, nTimeString, nonceString);
-            _logger.Debug("Share submitted at {0:0.00} : " + share.IsValid);
+            try
+            {
+                var share = new Share(miner, id, job, extraNonce2, nTimeString, nonceString);
+                _logger.Debug("Share submitted at {0:0.00} : " + share.IsValid);
+                if (share.IsValid)
+                    HandleValidShare(share);
+                else
+                    HandleInvalidShare(share);
 
-            if (share.IsValid)
-                HandleValidShare(share);
-            else
-                HandleInvalidShare(share);
+                OnShareSubmitted(new ShareEventArgs(miner));  // notify the listeners about the share.
 
-            OnShareSubmitted(new ShareEventArgs(miner));  // notify the listeners about the share.
+                return share;
+            }
+            catch(Exception e)
+            {
+                _logger.Error("Error occured in share: " + e.Message);
+                throw e;
+            }
 
-            return share;
+           
         }
 
         public IShare ProcessShare(IGetworkMiner miner, string data)
