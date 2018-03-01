@@ -75,11 +75,10 @@ namespace CoiniumServ.Algorithms.Implementations
                 }
                 else
                 {
-                    output = output + (char)algoDigit;
+                    output = output + algoDigit;
                 }
 
             }
-            output += '\0';
             return output;
 
         }
@@ -96,6 +95,8 @@ namespace CoiniumServ.Algorithms.Implementations
             }
 
             return buffer;
+
+
         }
     }
 }
