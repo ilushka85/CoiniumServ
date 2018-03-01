@@ -188,12 +188,14 @@ namespace CoiniumServ.Shares
                     {
                         _logger.Debug("We are submitting via SubmitBlock;  [{0:l}] ", share.BlockHash.ToHexString());
 
-                        _daemonClient.SubmitBlock(share.BlockHex.ToHexString()); // submit the block.
+                        var result = _daemonClient.SubmitBlock(share.BlockHex.ToHexString()); // submit the block.
+                        _logger.Debug("Submit Block Result via SubmitBlock;  [{0:l}]   [{1:1}] ", share.BlockHash.ToHexString(), result);
                     }
                     else
                     {
                         _logger.Debug("We are submitting via GetBlockTemplate;  [{0:l}] ", share.BlockHash.ToHexString());
-                        _daemonClient.GetBlockTemplate(share.BlockHex.ToHexString()); // use getblocktemplate() if submitblock() is not supported.
+                        var result = _daemonClient.GetBlockTemplate(share.BlockHex.ToHexString()); // use getblocktemplate() if submitblock() is not supported.
+                        _logger.Debug("Submit Block Result via getBlockTemplate;  [{0:l}]   [{1:1}] ", share.BlockHash.ToHexString(), result);
                     }
                     rValue = true;
                 }
