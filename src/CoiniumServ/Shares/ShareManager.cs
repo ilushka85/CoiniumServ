@@ -206,7 +206,7 @@ namespace CoiniumServ.Shares
                     continue;
                 }
             }
-            if(rValue==false)
+            if (rValue == false)
             {
                 return rValue;
             }
@@ -266,36 +266,36 @@ namespace CoiniumServ.Shares
                 return false;
             }
         }
-    }
 
-    private void OnBlockFound(EventArgs e)
-    {
-        var handler = BlockFound;
 
-        if (handler != null)
-            handler(this, e);
-    }
-
-    private void OnShareSubmitted(EventArgs e)
-    {
-        var handler = ShareSubmitted;
-
-        if (handler != null)
-            handler(this, e);
-    }
-
-    private void FindPoolAccount()
-    {
-        try
+        private void OnBlockFound(EventArgs e)
         {
-            _poolAccount = !_poolConfig.Coin.Options.UseDefaultAccount // if UseDefaultAccount is not set
-                ? _daemonClient.GetAccount(_poolConfig.Wallet.Adress) // find the account of the our pool address.
-                : ""; // use the default account.
+            var handler = BlockFound;
+
+            if (handler != null)
+                handler(this, e);
         }
-        catch (RpcException e)
+
+        private void OnShareSubmitted(EventArgs e)
         {
-            _logger.Error("Error getting account for pool central wallet address: {0:l} - {1:l}", _poolConfig.Wallet.Adress, e.Message);
+            var handler = ShareSubmitted;
+
+            if (handler != null)
+                handler(this, e);
+        }
+
+        private void FindPoolAccount()
+        {
+            try
+            {
+                _poolAccount = !_poolConfig.Coin.Options.UseDefaultAccount // if UseDefaultAccount is not set
+                    ? _daemonClient.GetAccount(_poolConfig.Wallet.Adress) // find the account of the our pool address.
+                    : ""; // use the default account.
+            }
+            catch (RpcException e)
+            {
+                _logger.Error("Error getting account for pool central wallet address: {0:l} - {1:l}", _poolConfig.Wallet.Adress, e.Message);
+            }
         }
     }
-}
 }
