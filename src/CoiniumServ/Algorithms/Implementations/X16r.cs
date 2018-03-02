@@ -27,6 +27,7 @@
 // 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using HashLib;
 
@@ -62,41 +63,56 @@ namespace CoiniumServ.Algorithms.Implementations
 
             Multiplier = 1;
         }
-        private string GetAlgoString(char[] input)
+        private string GetAlgoString(int[] input)
         {
-            var output = "";
-            for (int x = 0; x < _hashers.Count; x++)
+            try
             {
-                char b = (char)((15 - x) >> 1);
-                int algoDigit = (x & 1) != 0 ? input[b] & 0xf : input[b] >> 4;
-                if (algoDigit >= 10)
+                var output = "";
+                for (int x = 0; x < _hashers.Count; x++)
                 {
-                    output = output + (char)('A' + (algoDigit - 10));
-                }
-                else
-                {
-                    output = output + algoDigit;
-                }
+                    char b = (char)((15 - x) >> 1);
+                    int algoDigit = (x & 1) != 0 ? input[b] & 0xf : input[b] >> 4;
+                    if (algoDigit >= 10)
+                    {
+                        output = output + (char)('A' + (algoDigit - 10));
+                    }
+                    else
+                    {
+                        output = output + algoDigit;
+                    }
 
+                }
+                return output;
             }
-            return output;
+            catch(Exception e)
+            {
+                throw e;
+            }
 
         }
         public byte[] Hash(byte[] input)
         {
-            var buffer = input;
-            var inputChars = System.Text.Encoding.Default.GetString(input).ToCharArray();
-            var algoString = GetAlgoString(inputChars);
-            for (int i = 0; i < 16; i++)
+            try
             {
-                char elem = algoString[i];
-                int algo = elem >= 'A' ? elem - 'A' + 10 : elem - '0';
-                buffer = _hashers[algo].ComputeBytes(buffer).GetBytes();
+                var buffer = input;
+                var algoString = GetAlgoString(Array.ConvertAll(input, Convert.ToInt32));
+                for (int i = 0; i < 16; i++)
+                {
+                    char elem = algoString[i];
+                    int algo = elem >= 'A' ? elem - 'A' + 10 : elem - '0';
+                    buffer = _hashers[algo].ComputeBytes(buffer).GetBytes();
+                }
+                byte[] output = new byte[32];
+                Array.Copy(buffer, output, 32);
+                return output;
+
+
+
             }
-
-            return buffer;
-
-
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
     }
 }
