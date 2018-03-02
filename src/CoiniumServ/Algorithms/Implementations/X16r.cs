@@ -63,6 +63,20 @@ namespace CoiniumServ.Algorithms.Implementations
 
             Multiplier = 1;
         }
+
+
+        private int GetHashSelection(int[] prevHash, int index)
+        {
+            int nibble = prevHash[4 + 7 - (index / 2)];
+            if (index % 2 == 0)
+            {
+                return nibble >> 4;
+            }
+            else
+            {
+                return nibble & 0x0f;
+            }
+        }
         private string GetAlgoString(int[] input)
         {
             try
@@ -84,7 +98,7 @@ namespace CoiniumServ.Algorithms.Implementations
                 }
                 return output;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw e;
             }
@@ -94,19 +108,16 @@ namespace CoiniumServ.Algorithms.Implementations
         {
             try
             {
+                
                 var buffer = input;
-                var algoString = GetAlgoString(Array.ConvertAll(input, Convert.ToInt32));
+                var prevHash = Array.ConvertAll(input, Convert.ToInt32);
                 for (int i = 0; i < 16; i++)
                 {
-                    char elem = algoString[i];
-                    int algo = elem >= 'A' ? elem - 'A' + 10 : elem - '0';
-                    buffer = _hashers[algo].ComputeBytes(buffer).GetBytes();
+                    var hashSelection = GetHashSelection(prevHash, i);
+                    buffer = _hashers[hashSelection].ComputeBytes(buffer).GetBytes();
+
                 }
-                byte[] output = new byte[32];
-                Array.Copy(buffer, output, 32);
-                return output;
-
-
+                return buffer;
 
             }
             catch (Exception e)
