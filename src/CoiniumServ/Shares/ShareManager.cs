@@ -110,13 +110,13 @@ namespace CoiniumServ.Shares
 
                 return share;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _logger.Error("Error occured in share: " + e.Message);
                 throw e;
             }
 
-           
+
         }
 
         public IShare ProcessShare(IGetworkMiner miner, string data)
@@ -196,18 +196,34 @@ namespace CoiniumServ.Shares
                 {
                     if (_poolConfig.Coin.Options.SubmitBlockSupported) // see if submitblock() is available.
                     {
-                        _logger.Debug("We are submitting via SubmitBlock;  [{0:l}] ", share.BlockHash.ToHexString());
 
                         var result = _daemonClient.SubmitBlock(share.BlockHex.ToHexString()); // submit the block.
                         _logger.Debug("Submit Block Result via SubmitBlock;  [{0:l}]   [{1:1}] ", share.BlockHash.ToHexString(), result);
+                        if (result == null)
+                        {
+                            rValue = true;
+                            break;
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
                     else
                     {
-                        _logger.Debug("We are submitting via GetBlockTemplate;  [{0:l}] ", share.BlockHash.ToHexString());
                         var result = _daemonClient.GetBlockTemplate(share.BlockHex.ToHexString()); // use getblocktemplate() if submitblock() is not supported.
+
                         _logger.Debug("Submit Block Result via getBlockTemplate;  [{0:l}]   [{1:1}] ", share.BlockHash.ToHexString(), result);
+                        if (result == null)
+                        {
+                            rValue = true;
+                            break;
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
-                    rValue = true;
                 }
                 catch (RpcException e)
                 {
