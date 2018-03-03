@@ -414,6 +414,7 @@
     <Compile Include="Server\Web\Models\Pool\PoolsModel.cs" />
     <Compile Include="Server\Web\Models\RoundModel.cs" />
     <Compile Include="Server\Web\Models\WorkersModel.cs" />
+    <Compile Include="Server\Web\Modules\BlockNotifyModule.cs" />
     <Compile Include="Server\Web\Modules\AlgorithmModule.cs" />
     <Compile Include="Server\Web\Modules\AlgorithmsModule.cs" />
     <Compile Include="Server\Web\Modules\ApiModule.cs" />

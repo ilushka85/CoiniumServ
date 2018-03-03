@@ -30,6 +30,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CoiniumServ.Daemon.Responses;
 using CoiniumServ.Persistance.Blocks;
 using CoiniumServ.Persistance.Query;
 using CoiniumServ.Shares;
@@ -40,7 +41,7 @@ namespace CoiniumServ.Persistance.Layers.Mpos
 {
     public partial class MposStorage
     {
-        public void AddBlock(IShare share)
+        public void AddBlock(Block block, Transaction transaction)
         {
             // this function is not supported as this functionality is handled by mpos itself.
         }

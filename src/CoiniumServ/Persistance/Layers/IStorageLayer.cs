@@ -29,6 +29,7 @@
 
 using System.Collections.Generic;
 using CoiniumServ.Accounts;
+using CoiniumServ.Daemon.Responses;
 using CoiniumServ.Mining;
 using CoiniumServ.Payments;
 using CoiniumServ.Persistance.Blocks;
@@ -91,8 +92,9 @@ namespace CoiniumServ.Persistance.Layers
         /// <summary>
         /// Adds a new block contained within the given share.
         /// </summary>
-        /// <param name="share"></param>
-        void AddBlock(IShare share);
+        /// <param name="block"></param>
+        /// <param name="transaction"></param>
+        void AddBlock(Block block, Daemon.Responses.Transaction transaction);
 
         /// <summary>
         /// Updated a given block.

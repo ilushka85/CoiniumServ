@@ -143,9 +143,8 @@ namespace CoiniumServ.Shares
                 return; // just return as we don't need to notify about it and store it.
 
             OnBlockFound(EventArgs.Empty); // notify the listeners about the new block.
-
-            _storageLayer.AddBlock(share); // commit the block details to storage.
-            _storageLayer.MoveCurrentShares(share.Height); // move associated shares to new key.
+            
+            
         }
 
         private void HandleInvalidShare(IShare share)
@@ -234,65 +233,7 @@ namespace CoiniumServ.Shares
                     continue;
                 }
             }
-            if (rValue == false)
-            {
-                return rValue;
-            }
-            try
-            {
-                var block = _daemonClient.GetBlock(share.BlockHash.ToHexString()); // query the block.
-
-                if (block == null) // make sure the block exists
-                    return false;
-
-                if (block.Confirmations == -1) // make sure the block is accepted.
-                {
-                    _logger.Debug("Submitted block [{0}] is orphaned; [{1:l}]", block.Height, block.Hash);
-                    return false;
-                }
-
-                var expectedTxHash = share.CoinbaseHash.Bytes.ReverseBuffer().ToHexString(); // calculate our expected generation transactions's hash
-                var genTxHash = block.Tx.First(); // read the hash of very first (generation transaction) of the block
-
-                if (expectedTxHash != genTxHash) // make sure our calculated generated transaction and one reported by coin daemon matches.
-                {
-                    _logger.Debug("Submitted block [{0}] doesn't seem to belong us as reported generation transaction hash [{1:l}] doesn't match our expected one [{2:l}]", block.Height, genTxHash, expectedTxHash);
-                    return false;
-                }
-
-                var genTx = _daemonClient.GetTransaction(block.Tx.First()); // get the generation transaction.
-
-                // make sure we were able to read the generation transaction
-                if (genTx == null)
-                {
-                    _logger.Debug("Submitted block [{0}] doesn't seem to belong us as we can't read the generation transaction on our records [{1:l}]", block.Height, block.Tx.First());
-                    return false;
-                }
-
-                var poolOutput = genTx.GetPoolOutput(_poolConfig.Wallet.Adress, _poolAccount); // get the output that targets pool's central address.
-
-                // make sure the blocks generation transaction contains our central pool wallet address
-                if (poolOutput == null)
-                {
-                    _logger.Debug("Submitted block [{0}] doesn't seem to belong us as generation transaction doesn't contain an output for pool's central wallet address: {0:}", block.Height, _poolConfig.Wallet.Adress);
-                    return false;
-                }
-
-                // if the code flows here, then it means the block was succesfully submitted and belongs to us.
-                share.SetFoundBlock(block, genTx); // assign the block to share.
-
-                _logger.Information("Found block [{0}] with hash [{1:l}]", share.Height, share.BlockHash.ToHexString());
-
-                return true;
-            }
-            catch (RpcException e)
-            {
-                // unlike BlockProcessor's detailed exception handling and decision making based on the error,
-                // here in share-manager we only one-shot submissions. If we get an error, basically we just don't care about the rest
-                // and flag the submission as failed.
-                _logger.Debug("We thought a block was found but while loading it back it was not found or had an error; [{0:l}] - reason; {1:l}", share.BlockHash.ToHexString(), e.Message);
-                return false;
-            }
+            return rValue;
         }
 
 

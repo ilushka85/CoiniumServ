@@ -30,6 +30,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CoiniumServ.Daemon.Responses;
 using CoiniumServ.Persistance.Blocks;
 using CoiniumServ.Persistance.Query;
 using CoiniumServ.Shares;
@@ -42,7 +43,7 @@ namespace CoiniumServ.Persistance.Layers.Hybrid
 {
     public partial class HybridStorage
     {
-        public void AddBlock(IShare share)
+        public void AddBlock(Block block,Transaction transaction)
         {
             try
             {
@@ -55,11 +56,11 @@ namespace CoiniumServ.Persistance.Layers.Hybrid
                         @"INSERT INTO Block(Height, BlockHash, TxHash, Amount, CreatedAt) VALUES (@height, @blockHash, @txHash, @amount, @createdAt)",
                         new
                         {
-                            height = share.Block.Height,
-                            blockHash = share.BlockHash.ToHexString(),
-                            txHash = share.Block.Tx.First(),
-                            amount = (decimal)share.GenerationTransaction.TotalAmount,
-                            createdAt = share.Block.Time.UnixTimestampToDateTime()
+                            height = block.Height,
+                            blockHash = block.Hash,
+                            txHash = block.Tx.First(),
+                            amount = (decimal)transaction.TotalAmount,
+                            createdAt = block.Time.UnixTimestampToDateTime()
                         });
                 }
             }

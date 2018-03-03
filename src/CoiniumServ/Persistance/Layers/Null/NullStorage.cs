@@ -29,6 +29,7 @@
 
 using System.Collections.Generic;
 using CoiniumServ.Accounts;
+using CoiniumServ.Daemon.Responses;
 using CoiniumServ.Mining;
 using CoiniumServ.Payments;
 using CoiniumServ.Persistance.Blocks;
@@ -72,7 +73,7 @@ namespace CoiniumServ.Persistance.Layers.Null
             return new Dictionary<string, double>();
         }
 
-        public void AddBlock(IShare share)
+        public void AddBlock(Block block, Daemon.Responses.Transaction transaction)
         {
             return;
         }
