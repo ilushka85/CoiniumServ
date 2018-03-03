@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoiniumServ", "src\CoiniumServ\CoiniumServ.csproj", "{17A4E177-A910-40F8-899D-79A7F628699E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "src\Tests\Tests.csproj", "{ED50E979-2514-4C10-9E68-E35574B9A9AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockNotify", "BlockNotify\BlockNotify.csproj", "{03227FA9-2A59-4B3F-92D1-C816D03D0A95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{ED50E979-2514-4C10-9E68-E35574B9A9AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED50E979-2514-4C10-9E68-E35574B9A9AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED50E979-2514-4C10-9E68-E35574B9A9AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03227FA9-2A59-4B3F-92D1-C816D03D0A95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03227FA9-2A59-4B3F-92D1-C816D03D0A95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03227FA9-2A59-4B3F-92D1-C816D03D0A95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03227FA9-2A59-4B3F-92D1-C816D03D0A95}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
